@@ -75,12 +75,12 @@ export CGO_CFLAGS_ALLOW="-O -D__BLST_PORTABLE__"
 
 ## Executables
 
-The bsc project comes with several wrappers/executables found in the `cmd`
+The VC project comes with several wrappers/executables found in the `cmd`
 directory.
 
 |  Command   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | :--------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`geth`** | Main BNB Smart Chain client binary. It is the entry point into the BSC network (main-, test- or private net), capable of running as a full node (default), archive node (retaining all historical state) or a light node (retrieving data live). It has the same and more RPC and other interface as go-ethereum and can be used by other processes as a gateway into the BSC network via JSON RPC endpoints exposed on top of HTTP, WebSocket and/or IPC transports. `geth --help` and the [CLI page](https://geth.ethereum.org/docs/interface/command-line-options) for command line options. |
+| **`geth`** | Main BNB Smart Chain client binary. It is the entry point into the VC network (main-, test- or private net), capable of running as a full node (default), archive node (retaining all historical state) or a light node (retrieving data live). It has the same and more RPC and other interface as go-ethereum and can be used by other processes as a gateway into the VC network via JSON RPC endpoints exposed on top of HTTP, WebSocket and/or IPC transports. `geth --help` and the [CLI page](https://geth.ethereum.org/docs/interface/command-line-options) for command line options. |
 |   `clef`   | Stand-alone signing tool, which can be used as a backend signer for `geth`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 |  `devp2p`  | Utilities to interact with nodes on the networking layer, without running a full blockchain.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 |  `abigen`  | Source code generator to convert Ethereum contract definitions into easy to use, compile-time type-safe Go packages. It operates on plain [Ethereum contract ABIs](https://docs.soliditylang.org/en/develop/abi-spec.html) with expanded functionality if the contract bytecode is also available. However, it also accepts Solidity source files, making development much more streamlined. Please see our [Native DApps](https://geth.ethereum.org/docs/dapp/native-bindings) page for details.                                                                                               |
@@ -109,72 +109,6 @@ The requirement for testnet:
 - 500G of storage for testnet.
 - 4 cores of CPU and 8 gigabytes of memory (RAM).
 
-### Steps to Run a Fullnode
-
-#### 1. Download the pre-build binaries
-```shell
-# Linux
-wget $(curl -s https://api.github.com/repos/bnb-chain/bsc/releases/latest |grep browser_ |grep geth_linux |cut -d\" -f4)
-mv geth_linux geth
-chmod -v u+x geth
-
-# MacOS
-wget $(curl -s https://api.github.com/repos/bnb-chain/bsc/releases/latest |grep browser_ |grep geth_mac |cut -d\" -f4)
-mv geth_macos geth
-chmod -v u+x geth
-```
-
-#### 2. Download the config files
-```shell
-//== mainnet
-wget $(curl -s https://api.github.com/repos/bnb-chain/bsc/releases/latest |grep browser_ |grep mainnet |cut -d\" -f4)
-unzip mainnet.zip
-
-//== testnet
-wget $(curl -s https://api.github.com/repos/bnb-chain/bsc/releases/latest |grep browser_ |grep testnet |cut -d\" -f4)
-unzip testnet.zip
-```
-
-#### 3. Download snapshot
-Download latest chaindata snapshot from [here](https://github.com/bnb-chain/bsc-snapshots). Follow the guide to structure your files.
-
-Note: if you can not download the chaindata snapshot and want to sync from genesis, you have to generate the genesis block first, you have already get the genesis.json in Step 2.
-So just run: `geth --datadir <datadir> init ./genesis.json`
-#### 4. Start a full node
-```shell
-./geth --config ./config.toml --datadir ./node  --cache 8000 --rpc.allow-unprotected-txs --txlookuplimit 0
-
-## It is recommand to run fullnode with `--tries-verify-mode none` if you want high performance and care little about state consistency
-./geth --config ./config.toml --datadir ./node  --cache 8000 --rpc.allow-unprotected-txs --txlookuplimit 0 --tries-verify-mode none
-```
-
-#### 5. Monitor node status
-
-Monitor the log from **./node/bsc.log** by default. When the node has started syncing, should be able to see the following output:
-```shell
-t=2022-09-08T13:00:27+0000 lvl=info msg="Imported new chain segment"             blocks=1    txs=177   mgas=17.317   elapsed=31.131ms    mgasps=556.259  number=21,153,429 hash=0x42e6b54ba7106387f0650defc62c9ace3160b427702dab7bd1c5abb83a32d8db dirty="0.00 B"
-t=2022-09-08T13:00:29+0000 lvl=info msg="Imported new chain segment"             blocks=1    txs=251   mgas=39.638   elapsed=68.827ms    mgasps=575.900  number=21,153,430 hash=0xa3397b273b31b013e43487689782f20c03f47525b4cd4107c1715af45a88796e dirty="0.00 B"
-t=2022-09-08T13:00:33+0000 lvl=info msg="Imported new chain segment"             blocks=1    txs=197   mgas=19.364   elapsed=34.663ms    mgasps=558.632  number=21,153,431 hash=0x0c7872b698f28cb5c36a8a3e1e315b1d31bda6109b15467a9735a12380e2ad14 dirty="0.00 B"
-```
-
-#### 6. Interact with fullnode
-Start up `geth`'s built-in interactive [JavaScript console](https://geth.ethereum.org/docs/interface/javascript-console),
-(via the trailing `console` subcommand) through which you can interact using [`web3` methods](https://web3js.readthedocs.io/en/) 
-(note: the `web3` version bundled within `geth` is very old, and not up to date with official docs),
-as well as `geth`'s own [management APIs](https://geth.ethereum.org/docs/rpc/server).
-This tool is optional and if you leave it out you can always attach to an already running
-`geth` instance with `geth attach`.
-
-#### 7. More
-
-More details about [running a node](https://docs.bnbchain.org/docs/validator/fullnode) and [becoming a validator](https://docs.bnbchain.org/docs/validator/create-val)
-
-*Note: Although some internal protective measures prevent transactions from
-crossing over between the main network and test network, you should always
-use separate accounts for play and real money. Unless you manually move
-accounts, `geth` will by default correctly separate the two networks and will not make any
-accounts available between them.*
-
 ### Configuration
 
 As an alternative to passing the numerous flags to the `geth` binary, you can also pass a
@@ -194,7 +128,7 @@ $ geth --your-favourite-flags dumpconfig
 ### Programmatically interfacing `geth` nodes
 
 As a developer, sooner rather than later you'll want to start interacting with `geth` and the
-BSC network via your own programs and not manually through the console. To aid
+VC network via your own programs and not manually through the console. To aid
 this, `geth` has built-in support for a JSON-RPC based APIs ([standard APIs](https://ethereum.github.io/execution-apis/api-documentation/)
 and [`geth` specific APIs](https://geth.ethereum.org/docs/interacting-with-geth/rpc)).
 These can be exposed via HTTP, WebSockets and IPC (UNIX sockets on UNIX based
@@ -228,45 +162,18 @@ can reuse the same connection for multiple requests!
 
 **Note: Please understand the security implications of opening up an HTTP/WS based
 transport before doing so! Hackers on the internet are actively trying to subvert
-BSC nodes with exposed APIs! Further, all browser tabs can access locally
+VC nodes with exposed APIs! Further, all browser tabs can access locally
 running web servers, so malicious web pages could try to subvert locally available
 APIs!**
 
 
-## Running a bootnode
-
-Bootnodes are super-lightweight nodes that are not behind a NAT and are running just discovery protocol. When you start up a node it should log your enode, which is a public identifier that others can use to connect to your node. 
-
-First the bootnode requires a key, which can be created with the following command, which will save a key to boot.key:
-
-```
-bootnode -genkey boot.key
-```
-
-This key can then be used to generate a bootnode as follows:
-
-```
-bootnode -nodekey boot.key -addr :30311 -network bsc
-```
-
-The choice of port passed to -addr is arbitrary. 
-The bootnode command returns the following logs to the terminal, confirming that it is running:
-
-```
-enode://3063d1c9e1b824cfbb7c7b6abafa34faec6bb4e7e06941d218d760acdd7963b274278c5c3e63914bd6d1b58504c59ec5522c56f883baceb8538674b92da48a96@127.0.0.1:0?discport=30311
-Note: you're using cmd/bootnode, a developer tool.
-We recommend using a regular node as bootstrap node for production deployments.
-INFO [08-21|11:11:30.687] New local node record                    seq=1,692,616,290,684 id=2c9af1742f8f85ce ip=<nil> udp=0 tcp=0
-INFO [08-21|12:11:30.753] New local node record                    seq=1,692,616,290,685 id=2c9af1742f8f85ce ip=54.217.128.118 udp=30311 tcp=0
-INFO [09-01|02:46:26.234] New local node record                    seq=1,692,616,290,686 id=2c9af1742f8f85ce ip=34.250.32.100  udp=30311 tcp=0
-```
 
 ## License
 
-The bsc library (i.e. all code outside of the `cmd` directory) is licensed under the
+The vc library (i.e. all code outside of the `cmd` directory) is licensed under the
 [GNU Lesser General Public License v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html),
 also included in our repository in the `COPYING.LESSER` file.
 
-The bsc binaries (i.e. all code inside of the `cmd` directory) is licensed under the
+The vc binaries (i.e. all code inside of the `cmd` directory) is licensed under the
 [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html), also
 included in our repository in the `COPYING` file.
